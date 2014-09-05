@@ -1,0 +1,4 @@
+sumapp
+======
+
+cloudify test application
