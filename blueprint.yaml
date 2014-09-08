@@ -1,0 +1,75 @@
+imports:
+    - http://www.getcloudify.org/spec/bash-plugin/1.0/plugin.yaml
+    - http://www.getcloudify.org/spec/openstack-plugin/1.0/plugin.yaml
+
+types:
+    vm_host:
+        derived_from: cloudify.openstack.server
+        properties:
+            -   cloudify_agent:
+                    user: ubuntu 
+            -   server:
+
+                ### if defined, will serve as the hostname for the started instance,
+                ### otherwise, the node_id will be used
+                    #name: no_name            ### HOST_NAME""
+                    image: b6d7ebc3-f589-4874-862b-5c581ee1d66e #75d47d10-fef8-473b-9dd1-fe2f7649cb41   ### IMAGE_NAME
+                    flavor: 451 # 84 #1 #    101 ### FLAVOR_NAME
+                    security_groups: ['sumapp_security_group']
+
+    sumapp:
+        derived_from: cloudify.types.bash.app_module
+        properties:
+            -   app_name
+            -   git_url
+            -   git_branch
+            -   base_port
+            -   num_instances
+
+blueprint:
+    name: sumapp
+    nodes:
+
+    - name: sumapp_security_group
+      type: cloudify.openstack.security_group
+      properties:
+        security_group:
+          name: sumapp_security_group
+        rules:
+          - remote_ip_prefix: 0.0.0.0/0
+            port: 8080
+          - remote_ip_prefix: 0.0.0.0/0
+            port: 27017
+          - remote_ip_prefix: 0.0.0.0/0
+            port: 28017
+
+    - name: floatingip
+      type: cloudify.openstack.floatingip    
+      properties:
+        floatingip:
+          floating_network_name: public
+
+    - name: sumapp_vm
+      type: vm_host
+      instances:
+          deploy: 1
+      relationships:
+        - target: floatingip
+          type: cloudify.openstack.server_connected_to_floating_ip
+        - target: sumapp_security_group
+          type: cloudify.relationships.depends_on
+
+    - name: sumapp
+      type: sumapp
+      properties:
+            app_name: sumapp
+            git_url: https://github.com/supersasha/sumapp.git
+            git_branch: master 
+            base_port: 8080
+            #num_instances: 1
+            scripts:            
+                create: scripts/install.sh
+                start: scripts/start.sh
+      relationships:
+        - type: cloudify.relationships.contained_in
+          target: sumapp_vm
