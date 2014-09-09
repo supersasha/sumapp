@@ -32,11 +32,11 @@ else
 
     info "cloning application from git url ${git_url}" 
     git clone ${git_url} || exit $?
-    cd sumapp || exit $?
-    if [[ ! -z $git_branch ]]; then
-        info "checking out branch ${git_branch}" 
-        git checkout ${git_branch} || exit $?
-    fi
+    #cd sumapp || exit $?
+    #if [[ ! -z $git_branch ]]; then
+    #    info "checking out branch ${git_branch}" 
+    #    git checkout ${git_branch} || exit $?
+    #fi
 fi
 
 info "Installing pip"
