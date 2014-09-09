@@ -40,11 +40,10 @@ else
 fi
 
 info "Installing pip"
-sudo apt-get install python-pip
-info "result=$?"
+sudo apt-get -qq install python-pip || exit $?
+
 info "Installing flask"
-sudo pip install flask
-info "result=$?"
+sudo pip install flask || exit $?
 
 info "Finished installing application ${app_name}"
 
