@@ -18,7 +18,7 @@ APT_GET_CMD=$(which apt-get)
 
 
 info "Downloading application sources to ${TEMP_DIR}"
-if [ -f sumapp ]; then
+if [ -d sumapp ]; then
     info "Application sources already exists, skipping"   
 else
     if [[ ! -z $YUM_CMD ]]; then
@@ -37,11 +37,14 @@ else
         info "checking out branch ${git_branch}" 
         git checkout ${git_branch} || exit $?
     fi
-    info "Installing pip"
-    sudo apt-get install python-pip || exit $?
-    info "Installing flask"
-    sudo pip install flask || exit $?
 fi
+
+info "Installing pip"
+sudo apt-get install python-pip
+info "result=$?"
+info "Installing flask"
+sudo pip install flask
+info "result=$?"
 
 info "Finished installing application ${app_name}"
 
